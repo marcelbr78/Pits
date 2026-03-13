@@ -14,3 +14,191 @@
 2026-03-13 14:21:49,654 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
 2026-03-13 14:22:09,652 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
 2026-03-13 14:22:16,219 - TickCollector - INFO - Tick collection rate: 8.30 ticks/sec
+2026-03-13 14:23:16,224 - TickCollector - INFO - Tick collection rate: 8.62 ticks/sec
+2026-03-13 14:23:56,174 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:24:12,317 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:24:16,237 - TickCollector - INFO - Tick collection rate: 10.28 ticks/sec
+2026-03-13 14:25:16,250 - TickCollector - INFO - Tick collection rate: 8.72 ticks/sec
+2026-03-13 14:26:05,908 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 14:26:16,263 - TickCollector - INFO - Tick collection rate: 10.17 ticks/sec
+2026-03-13 14:26:21,939 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:26:27,634 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:27:16,267 - TickCollector - INFO - Tick collection rate: 9.43 ticks/sec
+2026-03-13 14:28:16,268 - TickCollector - INFO - Tick collection rate: 7.83 ticks/sec
+2026-03-13 14:28:21,559 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:29:03,021 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:29:16,273 - TickCollector - INFO - Tick collection rate: 9.45 ticks/sec
+2026-03-13 14:30:10,341 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 14:30:16,288 - TickCollector - INFO - Tick collection rate: 7.57 ticks/sec
+2026-03-13 14:31:16,296 - TickCollector - INFO - Tick collection rate: 8.02 ticks/sec
+2026-03-13 14:31:21,013 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:32:02,264 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:32:16,313 - TickCollector - INFO - Tick collection rate: 7.87 ticks/sec
+2026-03-13 14:32:22,738 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 14:33:16,329 - TickCollector - INFO - Tick collection rate: 8.72 ticks/sec
+2026-03-13 14:33:39,114 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:34:05,615 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:34:16,336 - TickCollector - INFO - Tick collection rate: 9.03 ticks/sec
+2026-03-13 14:35:16,352 - TickCollector - INFO - Tick collection rate: 9.35 ticks/sec
+2026-03-13 14:35:44,513 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:36:16,358 - TickCollector - INFO - Tick collection rate: 8.95 ticks/sec
+2026-03-13 14:36:56,841 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:37:16,359 - TickCollector - INFO - Tick collection rate: 10.58 ticks/sec
+2026-03-13 14:38:16,361 - TickCollector - INFO - Tick collection rate: 8.58 ticks/sec
+2026-03-13 14:38:16,864 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:38:35,033 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 14:39:16,366 - TickCollector - INFO - Tick collection rate: 6.95 ticks/sec
+2026-03-13 14:39:43,182 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:40:07,546 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:40:16,372 - TickCollector - INFO - Tick collection rate: 8.07 ticks/sec
+2026-03-13 14:40:45,391 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 14:41:16,373 - TickCollector - INFO - Tick collection rate: 9.85 ticks/sec
+2026-03-13 14:42:16,379 - TickCollector - INFO - Tick collection rate: 13.12 ticks/sec
+2026-03-13 14:42:18,250 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:42:42,068 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:43:16,384 - TickCollector - INFO - Tick collection rate: 10.18 ticks/sec
+2026-03-13 14:43:22,718 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:43:53,944 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 14:44:16,389 - TickCollector - INFO - Tick collection rate: 10.37 ticks/sec
+2026-03-13 14:44:49,766 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:45:16,403 - TickCollector - INFO - Tick collection rate: 10.25 ticks/sec
+2026-03-13 14:46:16,409 - TickCollector - INFO - Tick collection rate: 11.07 ticks/sec
+2026-03-13 14:46:21,606 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:46:32,430 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:47:16,426 - TickCollector - INFO - Tick collection rate: 11.67 ticks/sec
+2026-03-13 14:47:49,103 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:48:16,435 - TickCollector - INFO - Tick collection rate: 10.23 ticks/sec
+2026-03-13 14:48:28,966 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 14:49:16,449 - TickCollector - INFO - Tick collection rate: 10.08 ticks/sec
+2026-03-13 14:49:31,240 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 14:49:36,879 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:50:02,990 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:50:16,455 - TickCollector - INFO - Tick collection rate: 10.45 ticks/sec
+2026-03-13 14:50:40,834 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:51:16,457 - TickCollector - INFO - Tick collection rate: 13.07 ticks/sec
+2026-03-13 14:52:16,462 - TickCollector - INFO - Tick collection rate: 12.42 ticks/sec
+2026-03-13 14:52:37,454 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:52:42,087 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 14:53:05,389 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:53:15,785 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:53:16,479 - TickCollector - INFO - Tick collection rate: 9.53 ticks/sec
+2026-03-13 14:54:16,480 - TickCollector - INFO - Tick collection rate: 8.70 ticks/sec
+2026-03-13 14:55:16,491 - TickCollector - INFO - Tick collection rate: 8.43 ticks/sec
+2026-03-13 14:56:13,822 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:56:16,493 - TickCollector - INFO - Tick collection rate: 8.70 ticks/sec
+2026-03-13 14:57:10,657 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:57:16,508 - TickCollector - INFO - Tick collection rate: 8.62 ticks/sec
+2026-03-13 14:57:37,545 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 14:58:16,515 - TickCollector - INFO - Tick collection rate: 10.58 ticks/sec
+2026-03-13 14:58:38,727 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 14:58:59,161 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:59:13,091 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 14:59:16,530 - TickCollector - INFO - Tick collection rate: 8.97 ticks/sec
+2026-03-13 15:00:03,716 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:00:16,541 - TickCollector - INFO - Tick collection rate: 10.65 ticks/sec
+2026-03-13 15:01:16,551 - TickCollector - INFO - Tick collection rate: 10.93 ticks/sec
+2026-03-13 15:01:38,975 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:02:16,565 - TickCollector - INFO - Tick collection rate: 9.75 ticks/sec
+2026-03-13 15:02:26,184 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:03:01,519 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:03:16,608 - TickCollector - INFO - Tick collection rate: 7.57 ticks/sec
+2026-03-13 15:04:16,621 - TickCollector - INFO - Tick collection rate: 7.82 ticks/sec
+2026-03-13 15:05:10,001 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:05:16,631 - TickCollector - INFO - Tick collection rate: 8.67 ticks/sec
+2026-03-13 15:05:26,482 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 15:06:16,634 - TickCollector - INFO - Tick collection rate: 8.25 ticks/sec
+2026-03-13 15:06:41,346 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:06:58,016 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 15:07:16,652 - TickCollector - INFO - Tick collection rate: 11.62 ticks/sec
+2026-03-13 15:07:45,584 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:08:16,660 - TickCollector - INFO - Tick collection rate: 8.47 ticks/sec
+2026-03-13 15:08:29,449 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:08:54,506 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:09:16,675 - TickCollector - INFO - Tick collection rate: 9.00 ticks/sec
+2026-03-13 15:10:16,680 - TickCollector - INFO - Tick collection rate: 9.25 ticks/sec
+2026-03-13 15:11:16,684 - TickCollector - INFO - Tick collection rate: 10.15 ticks/sec
+2026-03-13 15:11:27,163 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:11:46,506 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:12:16,695 - TickCollector - INFO - Tick collection rate: 8.97 ticks/sec
+2026-03-13 15:13:01,258 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 15:13:16,700 - TickCollector - INFO - Tick collection rate: 12.17 ticks/sec
+2026-03-13 15:13:20,587 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:13:54,672 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:13:59,281 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 15:14:04,773 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:14:16,711 - TickCollector - INFO - Tick collection rate: 12.13 ticks/sec
+2026-03-13 15:15:16,720 - TickCollector - INFO - Tick collection rate: 10.02 ticks/sec
+2026-03-13 15:16:16,730 - TickCollector - INFO - Tick collection rate: 6.12 ticks/sec
+2026-03-13 15:16:24,974 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:16:59,522 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:17:16,746 - TickCollector - INFO - Tick collection rate: 12.15 ticks/sec
+2026-03-13 15:18:16,757 - TickCollector - INFO - Tick collection rate: 9.02 ticks/sec
+2026-03-13 15:19:01,653 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:19:16,771 - TickCollector - INFO - Tick collection rate: 11.38 ticks/sec
+2026-03-13 15:19:20,991 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:19:59,174 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 15:20:02,732 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:20:16,773 - TickCollector - INFO - Tick collection rate: 11.90 ticks/sec
+2026-03-13 15:20:47,459 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:20:53,151 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 15:21:16,777 - TickCollector - INFO - Tick collection rate: 13.43 ticks/sec
+2026-03-13 15:22:16,779 - TickCollector - INFO - Tick collection rate: 9.25 ticks/sec
+2026-03-13 15:22:59,060 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:23:00,807 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:23:16,781 - TickCollector - INFO - Tick collection rate: 9.87 ticks/sec
+2026-03-13 15:24:03,425 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:24:16,784 - TickCollector - INFO - Tick collection rate: 11.03 ticks/sec
+2026-03-13 15:25:16,790 - TickCollector - INFO - Tick collection rate: 10.37 ticks/sec
+2026-03-13 15:25:29,576 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:25:31,694 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:26:16,798 - TickCollector - INFO - Tick collection rate: 10.83 ticks/sec
+2026-03-13 15:27:06,057 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 15:27:16,810 - TickCollector - INFO - Tick collection rate: 10.63 ticks/sec
+2026-03-13 15:27:17,650 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 15:27:24,606 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:28:16,813 - TickCollector - INFO - Tick collection rate: 9.57 ticks/sec
+2026-03-13 15:28:49,200 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:29:16,817 - TickCollector - INFO - Tick collection rate: 7.98 ticks/sec
+2026-03-13 15:30:07,278 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:30:16,828 - TickCollector - INFO - Tick collection rate: 8.20 ticks/sec
+2026-03-13 15:31:16,840 - TickCollector - INFO - Tick collection rate: 8.03 ticks/sec
+2026-03-13 15:31:34,832 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:32:07,142 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:32:16,848 - TickCollector - INFO - Tick collection rate: 5.82 ticks/sec
+2026-03-13 15:33:16,862 - TickCollector - INFO - Tick collection rate: 6.78 ticks/sec
+2026-03-13 15:34:16,870 - TickCollector - INFO - Tick collection rate: 4.60 ticks/sec
+2026-03-13 15:34:51,247 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:35:16,874 - TickCollector - INFO - Tick collection rate: 5.85 ticks/sec
+2026-03-13 15:35:53,453 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 15:36:16,887 - TickCollector - INFO - Tick collection rate: 5.38 ticks/sec
+2026-03-13 15:37:17,014 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:37:17,018 - TickCollector - INFO - Tick collection rate: 6.32 ticks/sec
+2026-03-13 15:38:12,608 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:38:17,027 - TickCollector - INFO - Tick collection rate: 4.00 ticks/sec
+2026-03-13 15:39:17,030 - TickCollector - INFO - Tick collection rate: 5.02 ticks/sec
+2026-03-13 15:40:17,037 - TickCollector - INFO - Tick collection rate: 4.80 ticks/sec
+2026-03-13 15:41:17,038 - TickCollector - INFO - Tick collection rate: 5.22 ticks/sec
+2026-03-13 15:41:46,826 - DataStorage - INFO - Flushed 500 ticks for UKOILm to data/ticks\UKOILm.parquet
+2026-03-13 15:42:13,500 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:42:17,047 - TickCollector - INFO - Tick collection rate: 5.63 ticks/sec
+2026-03-13 15:43:13,905 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:43:17,058 - TickCollector - INFO - Tick collection rate: 5.02 ticks/sec
+2026-03-13 15:44:17,064 - TickCollector - INFO - Tick collection rate: 8.43 ticks/sec
+2026-03-13 15:44:41,082 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:45:17,068 - TickCollector - INFO - Tick collection rate: 5.42 ticks/sec
+2026-03-13 15:45:46,310 - DataStorage - INFO - Flushed 500 ticks for ETHUSDm to data/ticks\ETHUSDm.parquet
+2026-03-13 15:46:17,072 - TickCollector - INFO - Tick collection rate: 5.02 ticks/sec
+2026-03-13 15:46:27,790 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:47:17,074 - TickCollector - INFO - Tick collection rate: 5.12 ticks/sec
+2026-03-13 15:48:17,077 - TickCollector - INFO - Tick collection rate: 5.40 ticks/sec
+2026-03-13 15:49:17,079 - TickCollector - INFO - Tick collection rate: 6.23 ticks/sec
+2026-03-13 15:50:13,197 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 15:50:17,089 - TickCollector - INFO - Tick collection rate: 5.92 ticks/sec
+2026-03-13 15:50:57,200 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 15:51:17,102 - TickCollector - INFO - Tick collection rate: 4.80 ticks/sec
+2026-03-13 15:51:35,558 - DataStorage - INFO - Flushed 500 ticks for BTCUSDm to data/ticks\BTCUSDm.parquet
+2026-03-13 15:58:13,507 - TickCollector - INFO - Tick collection rate: 2.27 ticks/sec
+2026-03-13 15:59:18,197 - TickCollector - INFO - Tick collection rate: 2.52 ticks/sec
+2026-03-13 16:00:18,201 - TickCollector - INFO - Tick collection rate: 4.65 ticks/sec
+2026-03-13 16:01:18,204 - TickCollector - INFO - Tick collection rate: 6.02 ticks/sec
+2026-03-13 16:01:26,072 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
