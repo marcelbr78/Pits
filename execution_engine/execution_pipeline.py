@@ -1,16 +1,16 @@
-import logging
-from typing import Dict, Any
 from .trade_executor import TradeExecutor
 from .position_manager import PositionManager
+from paper_trading.paper_trading_engine import PaperTradingEngine
 
 class ExecutionPipeline:
     """
     Final decision layer. Applies filters and executes trades.
     """
-    def __init__(self, executor: TradeExecutor, manager: PositionManager, live_trading: bool = False):
+    def __init__(self, executor: TradeExecutor, manager: PositionManager, paper_engine: PaperTradingEngine = None, live_trading: bool = False):
         self.logger = logging.getLogger("ExecutionPipeline")
         self.executor = executor
         self.manager = manager
+        self.paper_engine = paper_engine
         self.live_trading = live_trading
         
         # Configuration thresholds
@@ -61,5 +61,13 @@ class ExecutionPipeline:
                 self.executor.send_buy_order(symbol, lot_size)
             else:
                 self.executor.send_sell_order(symbol, lot_size)
-        else:
-            self.logger.info(f"SIMULATED TRADE: {trade_type} {symbol} | Prob: {prob_up:.2f} | Lot: {lot_size}")
+        elif self.paper_engine:
+            self.logger.info(f"PAPER SIGNAL: {trade_type} {symbol} | Prob: {prob_up:.2f} | Lot: {lot_size}")
+            self.paper_engine.open_trade(symbol, mid_price, lot_size, prob_up, trade_type)
+
+    def update_tick(self, tick: Dict[str, Any]):
+        """Passes real-time price updates to the paper trading engine."""
+        if not self.live_trading and self.paper_engine:
+            symbol = tick['symbol']
+            mid_price = (tick['bid'] + tick['ask']) / 2
+            self.paper_engine.update_trades(symbol, mid_price)

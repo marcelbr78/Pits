@@ -10,6 +10,9 @@ from risk_engine.manager import RiskManager
 from execution_engine.trade_executor import TradeExecutor
 from execution_engine.position_manager import PositionManager
 from execution_engine.execution_pipeline import ExecutionPipeline
+from paper_trading.paper_trading_engine import PaperTradingEngine
+from paper_trading.trade_logger import TradeLogger
+from paper_trading.performance_tracker import PerformanceTracker
 
 class PITSOrchestrator:
     """
@@ -34,6 +37,9 @@ class PITSOrchestrator:
         """Callback triggered for every new tick."""
         # 1. Store raw tick
         self.storage.save_tick(tick)
+        
+        # Update simulation if in dry run
+        self.execution_pipeline.update_tick(tick)
         
         # 2. Process features
         features = self.feature_pipeline.process_tick(tick)
@@ -68,9 +74,16 @@ class PITSOrchestrator:
             # Initialize Execution Engine
             self.executor = TradeExecutor()
             self.position_manager = PositionManager()
+            
+            # Phase 1: Paper Trading initialization
+            self.trade_logger = TradeLogger()
+            self.perf_tracker = PerformanceTracker()
+            self.paper_engine = PaperTradingEngine(self.trade_logger)
+            
             self.execution_pipeline = ExecutionPipeline(
                 self.executor, 
                 self.position_manager, 
+                paper_engine=self.paper_engine,
                 live_trading=not self.dry_run
             )
             
