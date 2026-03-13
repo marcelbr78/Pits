@@ -14,6 +14,7 @@ from paper_trading.paper_trading_engine import PaperTradingEngine
 from paper_trading.trade_logger import TradeLogger
 from paper_trading.performance_tracker import PerformanceTracker
 from learning_engine.learning_pipeline import LearningPipeline
+from market_intelligence.intelligence_pipeline import IntelligencePipeline
 
 class PITSOrchestrator:
     """
@@ -49,7 +50,11 @@ class PITSOrchestrator:
         # 3. Process features
         features = self.feature_pipeline.process_tick(tick)
         
-        # 3. Intelligence Layer (Phase 1)
+        # 4. Market Intelligence Layer
+        market_state = self.market_intelligence.get_market_state(features)
+        features['market_state'] = market_state
+        
+        # 5. Intelligence Layer (Phase 1)
         prob_up = self.ml_pipeline.process_features(features)
         recommended_risk = self.risk_manager.calculate_kelly_size(prob_up)
         
@@ -92,8 +97,8 @@ class PITSOrchestrator:
                 live_trading=not self.dry_run
             )
             
-            # Initialize Learning Engine
-            self.learning_pipeline = LearningPipeline()
+            # Initialize Market Intelligence
+            self.market_intelligence = IntelligencePipeline()
             
             self.collector = TickCollector(self.mt5, self.symbols)
             self.collector.set_callback(self._on_tick_received)
