@@ -15,6 +15,10 @@ from paper_trading.trade_logger import TradeLogger
 from paper_trading.performance_tracker import PerformanceTracker
 from learning_engine.learning_pipeline import LearningPipeline
 from market_intelligence.intelligence_pipeline import IntelligencePipeline
+from api.state import SystemState
+from api.server import run_server
+import os
+import time
 
 class PITSOrchestrator:
     """
@@ -26,7 +30,9 @@ class PITSOrchestrator:
         self.engines = {}
         self.is_running = False
         self.dry_run = dry_run
-        self.symbols = ["WTI", "XAUUSD", "US500", "DXY", "VIX", "BRENT"]
+        self.symbols = ["USOILm", "BTCUSDm", "ETHUSDm", "XAUUSDm", "UKOILm"]
+        self.state = SystemState()
+        self.state.set_live(not dry_run)
 
     def _setup_logger(self):
         logging.basicConfig(
@@ -37,6 +43,8 @@ class PITSOrchestrator:
 
     def _on_tick_received(self, tick: Dict[str, Any]):
         """Callback triggered for every new tick."""
+        if not self.is_running: return # Stop if paused via API
+        
         # 1. Store raw tick
         self.storage.save_tick(tick)
         
@@ -58,16 +66,61 @@ class PITSOrchestrator:
         prob_up = self.ml_pipeline.process_features(features)
         recommended_risk = self.risk_manager.calculate_kelly_size(prob_up)
         
-        # 4. Execution Layer
-        # Note: Position sizing for now uses a placeholder fixed conversion from risk %
-        # In Phase 2, this will use actual account equity
-        lot_size = recommended_risk * 10 # Example: 0.01 risk -> 0.1 lots
-        
+        # 6. Execution Layer
+        lot_size = recommended_risk * 10
         self.execution_pipeline.process_signal(features, prob_up, lot_size)
         
-        # 5. Logging (Simplified for live/dry-run)
-        if self.dry_run and prob_up != 0.5:
-            pass # Execution pipeline handles its own logging
+        # 7. Update System State for API/Dashboard
+        self._update_state(tick, features, prob_up, market_state)
+
+    def _update_state(self, tick, features, prob, market_state):
+        symbol = tick['symbol']
+        
+        # Update signals and features
+        self.state.update_signals(symbol, prob)
+        self.state.update_features(symbol, features)
+        
+        # Update Regime
+        # Assuming market_intelligence provides macro/vol/micro
+        # For now we use the combined string and mock components if needed
+        regime_data = {
+            "combined": market_state,
+            "volatility": "High" if "HIGH_VOL" in market_state else "Low",
+            "macro": "Trending" if "TRENDING" in market_state else "Ranging"
+        }
+        self.state.update_regime(regime_data)
+        
+        # Periodic updates for heavy metadata (positions, metrics)
+        now = time.time()
+        if not hasattr(self, '_last_slow_update'): self._last_slow_update = 0
+        
+        if now - self._last_slow_update > 5:
+            # Update Positions
+            raw_pos = self.position_manager.get_open_positions()
+            # Map MT5 positions to our API format
+            pos_list = []
+            for p in raw_pos:
+                pos_list.append({
+                    "symbol": p['symbol'],
+                    "type": "BUY" if p['type'] == 0 else "SELL",
+                    "entry": p['price_open'],
+                    "current": p['price_current'],
+                    "pnl": p['profit']
+                })
+            self.state.update_positions(pos_list)
+            
+            # Update Metrics (from Paper Trading)
+            if os.path.exists("data/paper_trades.parquet"):
+                try:
+                    df = self.perf_tracker.load_trades("data/paper_trades.parquet")
+                    metrics = self.perf_tracker.calculate_metrics(df)
+                    self.state.update_metrics(metrics)
+                    self.state.update_trades(df.to_dict(orient="records"))
+                except:
+                    pass
+            
+            self.state.set_mt5(self.mt5.is_connected())
+            self._last_slow_update = now
 
     def initialize_engines(self):
         """Initializes all modular engines."""
@@ -122,6 +175,16 @@ class PITSOrchestrator:
         self.is_running = True
         self.logger.info("PITS Orchestrator started.")
         
+        # Start API Server
+        api_thread = threading.Thread(
+            target=run_server, 
+            args=(self.state,), 
+            kwargs={"port": 8001}, 
+            daemon=True
+        )
+        api_thread.start()
+        self.logger.info("API Server started on port 8001.")
+
         # Start Tick Collector in a background thread
         if 'collector' in self.engines:
             collector_thread = threading.Thread(target=self.collector.run, daemon=True)

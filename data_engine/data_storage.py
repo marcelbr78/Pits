@@ -22,12 +22,14 @@ class DataStorage:
             if tick_data.get('ask', 0) < tick_data.get('bid', 0):
                 self.logger.warning(f"Rejected tick {tick_data['symbol']}: Ask ({tick_data['ask']}) < Bid ({tick_data['bid']})")
                 return False
-            if tick_data.get('volume', -1) <= 0:
-                self.logger.warning(f"Rejected tick {tick_data['symbol']}: Invalid volume {tick_data['volume']}")
-                return False
             if 'timestamp' not in tick_data or 'time_msc' not in tick_data:
                 self.logger.warning(f"Rejected tick {tick_data['symbol']}: Missing timestamp")
                 return False
+            
+            # Ensure volume is at least 0
+            if tick_data.get('volume', -1) < 0:
+                tick_data['volume'] = 0.0
+                
             return True
         except Exception as e:
             self.logger.error(f"Validation error: {str(e)}")
@@ -70,7 +72,10 @@ class DataStorage:
         df_new = pd.DataFrame(self.buffers[symbol])
         
         # Define exact schema for standardization
-        schema_cols = ['symbol', 'timestamp_dt', 'bid', 'ask', 'spread', 'volume']
+        schema_cols = ['symbol', 'timestamp', 'bid', 'ask', 'spread', 'volume']
+        if 'timestamp' in df_new.columns and 'timestamp_dt' in df_new.columns:
+            df_new = df_new.drop(columns=['timestamp'])
+            
         df_new = df_new.rename(columns={'timestamp_dt': 'timestamp'})
         df_new = df_new[schema_cols].astype({
             'symbol': 'string',

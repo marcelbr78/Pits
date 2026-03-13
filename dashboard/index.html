@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PITS Real-Time Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-dim: #8b949e;
+            --accent: #58a6ff;
+            --green: #3fb950;
+            --red: #f85149;
+            --yellow: #d29922;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+
+        .system-status { display: flex; gap: 15px; align-items: center; font-size: 0.9rem; }
+        .status-badge { 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .online { background-color: var(--green); box-shadow: 0 0 10px var(--green); }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .metric-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-card h3 { font-size: 0.85rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; }
+        .metric-card .value { font-size: 1.8rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel h2 { font-size: 1.1rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+
+        /* Signals / Probabilities */
+        .signals-grid { display: grid; gap: 10px; }
+        .signal-row { display: grid; grid-template-columns: 80px 1fr 60px; align-items: center; gap: 15px; }
+        .progress-bg { background: var(--bg); height: 10px; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; transition: width 0.5s ease; width: 0%; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; color: var(--text-dim); padding: 10px; border-bottom: 1px solid var(--border); font-weight: 400; }
+        td { padding: 12px 10px; border-bottom: 1px solid var(--border); }
+        .pnl-pos { color: var(--green); }
+        .pnl-neg { color: var(--red); }
+
+        /* Logs */
+        .log-container {
+            background-color: #000;
+            color: #0f0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 15px;
+            border-radius: 5px;
+            height: 250px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+        .log-entry { margin-bottom: 2px; }
+
+        /* Controls */
+        .controls { display: flex; flex-direction: column; gap: 10px; }
+        .btn {
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.2s;
+            background: var(--bg);
+            color: var(--text);
+        }
+        .btn:hover { background: #1f242c; }
+        .btn-pause { border-color: var(--red); color: var(--red); }
+        .btn-live { border-color: var(--yellow); color: var(--yellow); }
+
+        .feature-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .feature-val { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+
+        .calendar-item { padding: 10px; border-radius: 5px; background: var(--bg); margin-bottom: 10px; }
+        .countdown { color: var(--yellow); font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">PITS <span>OS</span></div>
+        <div class="system-status">
+            <div class="status-badge"><span class="status-dot" id="dot-mt5"></span> MT5</div>
+            <div class="status-badge"><span class="status-dot" id="dot-eng"></span> Engine</div>
+            <div class="status-badge" id="mode-badge">PAPER</div>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <div class="metric-card">
+            <h3>Win Rate</h3>
+            <div class="value" id="val-win">0.0%</div>
+        </div>
+        <div class="metric-card">
+            <h3>Sharpe Ratio</h3>
+            <div class="value" id="val-sharpe">0.00</div>
+        </div>
+        <div class="metric-card">
+            <h3>Profit Factor</h3>
+            <div class="value" id="val-pf">0.00</div>
+        </div>
+        <div class="metric-card">
+            <h3>Max Drawdown</h3>
+            <div class="value" id="val-dd">0.0%</div>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <div class="left-col">
+            <div class="panel">
+                <h2>Active Signals & Probabilities</h2>
+                <div class="signals-grid" id="signals-container">
+                    <!-- Signals will be injected here -->
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Open Positions</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Side</th>
+                            <th>Entry</th>
+                            <th>Current</th>
+                            <th>PnL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positions-body">
+                        <!-- Positions will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="panel">
+                <h2>Recent Trades</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Symbol</th>
+                            <th>Result</th>
+                            <th>Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trades-body">
+                        <!-- Trades will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="right-col">
+            <div class="panel">
+                <h2>Market Regime</h2>
+                <div class="feature-item"><span>Macro:</span> <span class="feature-val" id="reg-macro">N/A</span></div>
+                <div class="feature-item"><span>Volatility:</span> <span class="feature-val" id="reg-vol">N/A</span></div>
+                <div class="feature-item"><span>Micro:</span> <span class="feature-val" id="reg-micro">N/A</span></div>
+                <div style="margin-top:10px; padding-top:10px; border-top: 1px solid var(--border);">
+                    <span>Combined State:</span>
+                    <div id="reg-combined" style="margin-top:5px; font-weight:600; color:var(--accent);">N/A</div>
+                </div>
+            </div>
+
+            <div class="panel" id="wti-features">
+                <h2>WTI Live Features</h2>
+                <div class="feature-item"><span>OFI (Order Flow):</span> <span class="feature-val" id="feat-ofi">0.0</span></div>
+                <div class="feature-item"><span>VWAP Dev:</span> <span class="feature-val" id="feat-vwap">0.0</span></div>
+                <div class="feature-item"><span>Entropy:</span> <span class="feature-val" id="feat-ent">0.0</span></div>
+                <div class="feature-item"><span>Spread:</span> <span class="feature-val" id="feat-spr">0.0</span></div>
+                <div class="feature-item"><span>Volatility:</span> <span class="feature-val" id="feat-vol">0.0</span></div>
+            </div>
+
+            <div class="panel">
+                <h2>Economic Calendar</h2>
+                <div id="calendar-container">
+                    <div class="calendar-item">
+                        <div id="event-name">No upcoming events</div>
+                        <div class="countdown" id="event-timer">00:00:00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel controls">
+                <h2>System Control</h2>
+                <button class="btn" onclick="sendControl('resume')">Resume System</button>
+                <button class="btn btn-pause" onclick="sendControl('pause')">Pause Engine</button>
+                <button class="btn" onclick="sendControl('force_retrain')">Force Retraining</button>
+                <button class="btn btn-live" onclick="sendControl('set_live')">ACTIVATE LIVE TRADING</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>System Logs</h2>
+        <div class="log-container" id="log-monitor">
+            <div class="log-entry">> PITS Intelligence OS connected.</div>
+        </div>
+    </div>
+
+    <script>
+        const symbols = ["WTI", "XAUUSD", "BRENT", "DXY", "US500", "VIX"];
+        let ws;
+
+        function connect() {
+            ws = new WebSocket('ws://localhost:8001/ws');
+            
+            ws.onopen = () => {
+                console.log('Connected to PITS WebSocket');
+                document.getElementById('dot-eng').classList.add('online');
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                updateUI(data);
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected. Retrying...');
+                document.getElementById('dot-eng').classList.remove('online');
+                setTimeout(connect, 3000);
+            };
+        }
+
+        function updateUI(data) {
+            // Stats
+            document.getElementById('val-win').innerText = (data.metrics.win_rate * 100).toFixed(1) + '%';
+            document.getElementById('val-sharpe').innerText = data.metrics.sharpe.toFixed(2);
+            document.getElementById('val-pf').innerText = data.metrics.profit_factor.toFixed(2);
+            document.getElementById('val-dd').innerText = (data.metrics.drawdown * 100).toFixed(1) + '%';
+
+            // Status
+            document.getElementById('dot-mt5').className = 'status-dot ' + (data.mt5_connected ? 'online' : '');
+            document.getElementById('mode-badge').innerText = data.is_live ? 'LIVE' : 'PAPER';
+            document.getElementById('mode-badge').style.borderColor = data.is_live ? 'var(--yellow)' : 'var(--border)';
+
+            // Signals
+            const signalsContainer = document.getElementById('signals-container');
+            signalsContainer.innerHTML = '';
+            symbols.forEach(sym => {
+                const prob = data.signals[sym] || 0.5;
+                let color = 'var(--accent)';
+                if (prob > 0.75) color = 'var(--green)';
+                else if (prob < 0.25) color = 'var(--red)';
+                else if (prob > 0.55 || prob < 0.45) color = 'var(--yellow)';
+
+                signalsContainer.innerHTML += `
+                    <div class="signal-row">
+                        <div>${sym}</div>
+                        <div class="progress-bg"><div class="progress-fill" style="width: ${prob*100}%; background: ${color}"></div></div>
+                        <div style="text-align:right">${(prob * 100).toFixed(0)}%</div>
+                    </div>
+                `;
+            });
+
+            // Regime
+            document.getElementById('reg-macro').innerText = data.regime.macro;
+            document.getElementById('reg-vol').innerText = data.regime.volatility;
+            document.getElementById('reg-micro').innerText = data.regime.micro;
+            document.getElementById('reg-combined').innerText = data.regime.combined;
+
+            // WTI Features (or first available)
+            const wti = data.features['WTI'] || {};
+            document.getElementById('feat-ofi').innerText = (wti.ofi || 0).toFixed(2);
+            document.getElementById('feat-vwap').innerText = (wti.vwap || 0).toFixed(2);
+            document.getElementById('feat-ent').innerText = (wti.entropy || 0).toFixed(3);
+            document.getElementById('feat-spr').innerText = (wti.spread || 0).toFixed(6);
+            document.getElementById('feat-vol').innerText = (wti.volatility || 0).toFixed(5);
+
+            // Positions
+            const posBody = document.getElementById('positions-body');
+            posBody.innerHTML = '';
+            data.positions.forEach(p => {
+                const pnlClass = p.pnl >= 0 ? 'pnl-pos' : 'pnl-neg';
+                posBody.innerHTML += `
+                    <tr>
+                        <td>${p.symbol}</td>
+                        <td style="color:${p.type === 'BUY' ? 'var(--green)' : 'var(--red)'}">${p.type}</td>
+                        <td>${p.entry.toFixed(2)}</td>
+                        <td>${p.current.toFixed(2)}</td>
+                        <td class="${pnlClass}">${p.pnl.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            // Trades
+            const tradesBody = document.getElementById('trades-body');
+            tradesBody.innerHTML = '';
+            data.last_trades.forEach(t => {
+                tradesBody.innerHTML += `
+                    <tr>
+                        <td>${new Date(t.timestamp * 1000).toLocaleTimeString()}</td>
+                        <td>${t.symbol}</td>
+                        <td style="color:${t.result === 'PROFIT' ? 'var(--green)' : 'var(--red)'}">${t.result}</td>
+                        <td>$${t.profit.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            // Logs
+            const logMonitor = document.getElementById('log-monitor');
+            logMonitor.innerHTML = data.logs.map(l => `<div class="log-entry">> ${l}</div>`).join('');
+            logMonitor.scrollTop = logMonitor.scrollHeight;
+        }
+
+        function sendControl(action) {
+            fetch('http://localhost:8001/control', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action })
+            }).then(r => r.json()).then(d => console.log('Control Success:', d));
+        }
+
+        connect();
+    </script>
+</body>
+</html>

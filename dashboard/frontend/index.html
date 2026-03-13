@@ -12,11 +12,34 @@
     <header>
         <div class="logo">PITS <span>Intelligence</span></div>
         <div class="system-status">
-            <span class="status-dot green"></span> System Live
+            <span class="status-dot green"></span> <span id="conn-status">Checking MT5...</span>
         </div>
     </header>
 
     <main>
+        <section class="active-assets-bar">
+            <strong>Monitoring:</strong> <span id="assets-list">No data...</span>
+        </section>
+
+        <section class="tables-grid">
+            <div class="card table-box">
+                <h3>Live Market Monitor</h3>
+                <table id="live-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Price</th>
+                            <th>Prob (UP)</th>
+                            <th>Entropy</th>
+                            <th>Regime</th>
+                            <th>Session</th>
+                            <th>Total (Disk)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
         <section class="metrics-grid">
             <div class="card metric">
                 <h3>Win Rate</h3>

@@ -18,6 +18,10 @@ class IntelligencePipeline:
         """
         symbol = features['symbol']
         mid = (features.get('bid', 0) + features.get('ask', 0)) / 2
+        
+        # Fallback if features doesn't have bid/ask (get from tick if possible)
+        if mid == 0 and 'vwap' in features:
+            mid = features['vwap']
         vwap = features.get('vwap', 0)
         vol = features.get('volatility', 0)
         

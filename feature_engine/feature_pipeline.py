@@ -34,6 +34,8 @@ class FeaturePipeline:
         features = {
             'symbol': symbol,
             'timestamp': tick.get('timestamp'),
+            'bid': tick.get('bid'),
+            'ask': tick.get('ask'),
             'ofi': round(calcs['ofi'].update(tick), 4),
             'vwap': round(calcs['vwap'].update(tick), 4),
             'spread': round(tick.get('spread', tick['ask'] - tick['bid']), 6),

@@ -59,5 +59,43 @@ class MT5Connector:
             
         return book
 
+    def get_historical_ticks(self, symbol: str, count: int) -> Optional[List[Dict[str, Any]]]:
+        """Retrieves historical ticks from MT5."""
+        if not self.connected:
+            return None
+            
+        import datetime
+        import pandas as pd
+        
+        # Try fetching by count first
+        start_time = datetime.datetime.now()
+        ticks = mt5.copy_ticks_from(symbol, start_time, count, mt5.COPY_TICKS_ALL)
+        
+        if ticks is None or len(ticks) == 0:
+            # Fallback: try last 24 hours
+            end = datetime.datetime.now()
+            start = end - datetime.timedelta(hours=24)
+            ticks = mt5.copy_ticks_range(symbol, start, end, mt5.COPY_TICKS_ALL)
+
+        if ticks is None or len(ticks) == 0:
+            err = mt5.last_error()
+            self.logger.warning(f"Failed to get historical ticks for {symbol}: {err}")
+            return None
+            
+        # Convert structured numpy array to list of dicts using field names
+        tick_list = []
+        for t in ticks:
+            # Struct fields: time, bid, ask, last, volume, time_msc, flags, volume_real
+            tick_list.append({
+                "symbol": symbol,
+                "timestamp": int(t['time']),
+                "time_msc": int(t['time_msc']),
+                "bid": float(t['bid']),
+                "ask": float(t['ask']),
+                "last": float(t['last']),
+                "volume": float(t['volume_real'] if 'volume_real' in t.dtype.names else t['volume'])
+            })
+        return tick_list
+
     def is_connected(self) -> bool:
         return self.connected

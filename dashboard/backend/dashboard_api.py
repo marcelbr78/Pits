@@ -47,14 +47,22 @@ async def get_market_state():
     # or return a generic response since the orchestrator runs in a separate process.
     return {
         "status": "Operational",
-        "symbols": ["WTI", "XAUUSD", "US500", "DXY", "VIX", "BRENT"]
+        "symbols": ["USOILm", "BTCUSDm", "ETHUSDm", "XAUUSDm", "UKOILm"],
+        "connection": "Live (MT5 Real Account)"
     }
+
+@app.get("/api/live")
+async def get_live_state():
+    state_path = "data/live_state.json"
+    if os.path.exists(state_path):
+        with open(state_path, 'r') as f:
+            return json.load(f)
+    return {"symbols": {}}
 
 @app.get("/api/predictions")
 async def get_predictions():
-    # Placeholder for latest probabilities
-    return {"latest": "Updating..."}
+    return await get_live_state()
 
 # Serve frontend
-# Note: In a real deploy, we'd use StaticFiles
-# app.mount("/", StaticFiles(directory="dashboard/frontend", html=True), name="frontend")
+FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
+app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")

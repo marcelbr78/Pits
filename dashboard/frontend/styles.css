@@ -30,6 +30,17 @@ header {
 .logo { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.5px; }
 .logo span { color: var(--accent); }
 
+.active-assets-bar {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+#assets-list { color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-left: 10px; }
+
 .status-dot {
     width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px;
 }

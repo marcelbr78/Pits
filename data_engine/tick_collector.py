@@ -1,5 +1,6 @@
 import time
 import logging
+import MetaTrader5 as mt5
 from typing import List, Dict, Any, Callable
 from .mt5_connector import MT5Connector
 
@@ -30,6 +31,16 @@ class TickCollector:
         while self.is_running:
             try:
                 for symbol in self.symbols:
+                    # Ensure symbol is visible in Market Watch
+                    info = mt5.symbol_info(symbol)
+                    if info is None:
+                        self.logger.warning(f"Symbol {symbol} not found. Skipping.")
+                        continue
+                    if not info.select:
+                        if not mt5.symbol_select(symbol, True):
+                            self.logger.warning(f"Failed to select {symbol}. Skipping.")
+                            continue
+
                     tick = self.connector.get_tick(symbol)
                     if tick:
                         # Deduplication logic: check symbol + millisecond timestamp

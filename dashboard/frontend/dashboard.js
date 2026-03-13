@@ -1,6 +1,37 @@
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'http://localhost:8001/api';
 
 let equityChart;
+
+async function updateLiveState() {
+    try {
+        const response = await fetch(`${API_URL}/live`);
+        const data = await response.json();
+        
+        const tbody = document.querySelector('#live-table tbody');
+        if (!data.symbols) return;
+        
+        // Sorting symbols alphabetically
+        const sortedSymbols = Object.keys(data.symbols).sort();
+        
+        // We only want to reconstruct if needed, but for simplicity:
+        tbody.innerHTML = '';
+        sortedSymbols.forEach(sym => {
+            const s = data.symbols[sym];
+            const row = document.createElement('tr');
+            const probColor = s.prob_up > 0.6 ? 'profit' : (s.prob_up < 0.4 ? 'loss' : '');
+            row.innerHTML = `
+                <td>${sym}</td>
+                <td>${s.price.toFixed(5)}</td>
+                <td class="${probColor}">${(s.prob_up * 100).toFixed(1)}%</td>
+                <td>${s.entropy.toFixed(3)}</td>
+                <td><small>${s.market_state}</small></td>
+                <td>${s.tick_count}</td>
+                <td><strong>${s.total_stored.toLocaleString()}</strong></td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (e) { console.error('Error fetching live state:', e); }
+}
 
 async function updateMetrics() {
     try {
@@ -91,12 +122,31 @@ function updateChart(labels, data) {
     }
 }
 
-// Initial Call
+async function updateSystemState() {
+    try {
+        const response = await fetch(`${API_URL}/market_state`);
+        const data = await response.json();
+        if (data) {
+            document.getElementById('conn-status').innerText = data.connection;
+            document.getElementById('assets-list').innerText = data.symbols.join(', ');
+        }
+    } catch (e) { console.error('Error fetching state:', e); }
+}
+
+// Initial Calls
 updateMetrics();
 updateTrades();
+updateSystemState();
+updateLiveState();
 
-// Poll every 5 seconds
+// Poll trades/metrics every 5s
 setInterval(() => {
     updateMetrics();
     updateTrades();
+    updateSystemState();
 }, 5000);
+
+// Poll live signals every 1s
+setInterval(() => {
+    updateLiveState();
+}, 1000);
