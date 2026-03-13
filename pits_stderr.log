@@ -1,0 +1,14 @@
+2026-03-13 14:18:16,147 - BrainOrchestrator - INFO - Initializing PITS modular engines (Dry Run: True)...
+2026-03-13 14:18:16,170 - MT5Connector - INFO - MetaTrader 5 connected successfully.
+2026-03-13 14:18:16,171 - BayesianModel - WARNING - No model file found at models/bayesian_model.pkl
+2026-03-13 14:18:16,172 - XGBoostModel - WARNING - No XGBoost model found at models/xgboost_model.json
+2026-03-13 14:18:16,173 - BrainOrchestrator - INFO - Full Intelligence & Execution Pipeline (Phase 1) initialized.
+2026-03-13 14:18:16,173 - BrainOrchestrator - INFO - Initialization sequence complete.
+2026-03-13 14:18:16,173 - BrainOrchestrator - INFO - PITS Orchestrator started.
+2026-03-13 14:18:16,175 - BrainOrchestrator - INFO - API Server started on port 8001.
+2026-03-13 14:18:16,178 - TickCollector - INFO - Starting tick collection for: USOILm, BTCUSDm, ETHUSDm, XAUUSDm, UKOILm
+2026-03-13 14:18:16,178 - BrainOrchestrator - INFO - Tick collection background thread started.
+2026-03-13 14:19:16,183 - TickCollector - INFO - Tick collection rate: 7.82 ticks/sec
+2026-03-13 14:20:16,187 - TickCollector - INFO - Tick collection rate: 6.88 ticks/sec
+2026-03-13 14:21:16,199 - TickCollector - INFO - Tick collection rate: 7.80 ticks/sec
+2026-03-13 14:21:49,654 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
