@@ -204,6 +204,19 @@ class PITSOrchestrator:
         )
         api_thread.start()
         self.logger.info("API Server started on port 8001.")
+        
+        # Try to capture ngrok URL if running
+        try:
+            import requests
+            response = requests.get("http://localhost:4040/api/tunnels", timeout=2)
+            if response.status_code == 200:
+                tunnels = response.json().get('tunnels', [])
+                if tunnels:
+                    public_url = tunnels[0].get('public_url')
+                    self.logger.info(f"PUBLIC ACCESS: {public_url}")
+                    self.state.add_log(f"Public URL: {public_url}")
+        except:
+            pass
 
         # Start Tick Collector in a background thread
         if 'collector' in self.engines:

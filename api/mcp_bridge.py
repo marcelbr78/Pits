@@ -1,6 +1,6 @@
 import os
 import subprocess
-from fastapi import APIRouter, Header, HTTPException, Body
+from fastapi import APIRouter, Header, HTTPException, Body, Request
 from fastapi.responses import JSONResponse
 from .state import SystemState
 
@@ -13,8 +13,9 @@ def verify_key(api_key: str):
         raise HTTPException(status_code=403, detail="Unauthorized")
 
 @router.get("/status")
-async def mcp_status(x_api_key: str = Header(None), shared_state: SystemState = None):
+async def mcp_status(request: Request, x_api_key: str = Header(None)):
     verify_key(x_api_key)
+    shared_state = getattr(request.state, "shared_state", None)
     if not shared_state:
         raise HTTPException(status_code=500, detail="State not initialized")
     return shared_state.get_full_state()

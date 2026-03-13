@@ -1,76 +1,76 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-import asyncio, json, threading
+import asyncio, json
 from api.state import SystemState
 from api.mcp_bridge import setup_mcp_bridge
 
-_shared_state: SystemState = None
-
 def create_app(shared_state: SystemState) -> FastAPI:
-    global _shared_state
-    _shared_state = shared_state
-    
     app = FastAPI(title="PITS API")
-    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-    
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"]
+    )
+
     setup_mcp_bridge(app, shared_state)
-    
+
     @app.get("/status")
     def get_status():
-        s = _shared_state
-        with s.lock:
+        with shared_state.lock:
             return {
-                "is_running": s.is_running, 
-                "is_live": s.is_live, 
-                "mt5_connected": s.mt5_connected, 
-                "ticks_per_second": s.ticks_per_second
+                "is_running": shared_state.is_running,
+                "is_live": shared_state.is_live,
+                "mt5_connected": shared_state.mt5_connected,
+                "ticks_per_second": shared_state.ticks_per_second
             }
 
     @app.get("/metrics")
     def get_metrics():
-        with _shared_state.lock:
-            return _shared_state.metrics
+        with shared_state.lock:
+            return shared_state.metrics
 
     @app.get("/signals")
     def get_signals():
-        with _shared_state.lock:
-            return _shared_state.signals
+        with shared_state.lock:
+            return shared_state.signals
 
     @app.get("/positions")
     def get_positions():
-        with _shared_state.lock:
-            return _shared_state.positions
+        with shared_state.lock:
+            return shared_state.positions
 
     @app.get("/trades")
     def get_trades():
-        with _shared_state.lock:
-            return _shared_state.last_trades
+        with shared_state.lock:
+            return shared_state.last_trades
 
     @app.get("/regime")
     def get_regime():
-        with _shared_state.lock:
-            return _shared_state.regime
+        with shared_state.lock:
+            return shared_state.regime
 
     @app.get("/features/{symbol}")
     def get_features(symbol: str):
-        with _shared_state.lock:
-            return _shared_state.features.get(symbol.upper(), {})
+        with shared_state.lock:
+            return shared_state.features.get(symbol.upper(), {})
 
     @app.get("/calendar")
     def get_calendar():
-        with _shared_state.lock:
-            return _shared_state.next_event
+        with shared_state.lock:
+            return shared_state.next_event
 
     @app.post("/control")
     def control(action: str):
         if action == "pause":
-            _shared_state.set_running(False)
+            shared_state.set_running(False)
         elif action == "resume":
-            _shared_state.set_running(True)
+            shared_state.set_running(True)
         elif action == "set_live":
-            with _shared_state.lock:
-                _shared_state.is_live = True
+            with shared_state.lock:
+                shared_state.is_live = True
         return {"status": "ok", "action": action}
 
     @app.websocket("/ws")
@@ -78,7 +78,7 @@ def create_app(shared_state: SystemState) -> FastAPI:
         await websocket.accept()
         try:
             while True:
-                data = _shared_state.get_full_state()
+                data = shared_state.get_full_state()
                 await websocket.send_text(json.dumps(data, default=str))
                 await asyncio.sleep(1)
         except WebSocketDisconnect:

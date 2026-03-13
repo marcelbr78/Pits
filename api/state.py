@@ -87,6 +87,10 @@ class SystemState:
         with self.lock:
             self.is_running = running
 
+    def set_live(self, live: bool):
+        with self.lock:
+            self.is_live = live
+
     def get_full_state(self) -> Dict[str, Any]:
         with self.lock:
             return {
