@@ -13,6 +13,7 @@ from execution_engine.execution_pipeline import ExecutionPipeline
 from paper_trading.paper_trading_engine import PaperTradingEngine
 from paper_trading.trade_logger import TradeLogger
 from paper_trading.performance_tracker import PerformanceTracker
+from learning_engine.learning_pipeline import LearningPipeline
 
 class PITSOrchestrator:
     """
@@ -41,7 +42,11 @@ class PITSOrchestrator:
         # Update simulation if in dry run
         self.execution_pipeline.update_tick(tick)
         
-        # 2. Process features
+        # 2. Run Learning Engine audit (periodic)
+        if hasattr(self, 'learning_pipeline'):
+            self.learning_pipeline.run_cycle()
+        
+        # 3. Process features
         features = self.feature_pipeline.process_tick(tick)
         
         # 3. Intelligence Layer (Phase 1)
@@ -86,6 +91,9 @@ class PITSOrchestrator:
                 paper_engine=self.paper_engine,
                 live_trading=not self.dry_run
             )
+            
+            # Initialize Learning Engine
+            self.learning_pipeline = LearningPipeline()
             
             self.collector = TickCollector(self.mt5, self.symbols)
             self.collector.set_callback(self._on_tick_received)
