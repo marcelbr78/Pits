@@ -12,3 +12,5 @@
 2026-03-13 14:20:16,187 - TickCollector - INFO - Tick collection rate: 6.88 ticks/sec
 2026-03-13 14:21:16,199 - TickCollector - INFO - Tick collection rate: 7.80 ticks/sec
 2026-03-13 14:21:49,654 - DataStorage - INFO - Flushed 500 ticks for XAUUSDm to data/ticks\XAUUSDm.parquet
+2026-03-13 14:22:09,652 - DataStorage - INFO - Flushed 500 ticks for USOILm to data/ticks\USOILm.parquet
+2026-03-13 14:22:16,219 - TickCollector - INFO - Tick collection rate: 8.30 ticks/sec
