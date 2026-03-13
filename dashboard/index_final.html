@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PITS — Intelligence OS</title>
+<style>
+  :root {
+    --bg: #0a0e1a; --bg2: #111827; --bg3: #1a2235;
+    --accent: #00d4ff; --accent2: #7c3aed; --green: #10b981;
+    --red: #ef4444; --yellow: #f59e0b; --text: #e2e8f0; --muted: #64748b;
+    --border: #1e293b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; font-size: 12px; }
+  h1 { color: var(--accent); font-size: 16px; letter-spacing: 3px; }
+  h2 { color: var(--accent); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+
+  #header { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg2); }
+  #header-right { display: flex; gap: 20px; align-items: center; }
+  .badge { padding: 3px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+  .badge-paper { background: #1e3a5f; color: #60a5fa; }
+  .badge-live  { background: #450a0a; color: #f87171; }
+  .badge-on    { background: #064e3b; color: #34d399; }
+  .badge-off   { background: #1f2937; color: #6b7280; }
+
+  #grid { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: auto auto; gap: 12px; padding: 12px; }
+  .panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .panel-wide { grid-column: span 2; }
+  .panel-full { grid-column: span 3; }
+
+  #status-bar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding: 8px 12px; background: var(--bg2); border-bottom: 1px solid var(--border); }
+  .stat { text-align: center; }
+  .stat-val { font-size: 16px; font-weight: bold; color: var(--accent); }
+  .stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { color: var(--muted); font-size: 9px; text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--border); }
+  td { padding: 5px 6px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+
+  .prob-bar { background: var(--bg3); border-radius: 3px; height: 6px; margin-top: 3px; overflow: hidden; }
+  .prob-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  .up   { color: var(--green); }
+  .down { color: var(--red); }
+  .warn { color: var(--yellow); }
+  .muted { color: var(--muted); }
+
+  #log { height: 140px; overflow-y: auto; }
+  .log-item { padding: 3px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; }
+  .log-time { color: var(--muted); min-width: 52px; }
+  .log-msg  { color: var(--text); }
+
+  .regime-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; }
+  .regime-WAR        { background: #450a0a; color: #fca5a5; }
+  .regime-RISK_OFF   { background: #422006; color: #fdba74; }
+  .regime-RISK_ON    { background: #064e3b; color: #6ee7b7; }
+  .regime-INFLATION  { background: #451a03; color: #fcd34d; }
+  .regime-CRISIS     { background: #1c0533; color: #c084fc; }
+  .regime-NEUTRAL    { background: #1e293b; color: #94a3b8; }
+
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 12px; background: var(--bg2); border-top: 1px solid var(--border); }
+  .btn { padding: 6px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-family: monospace; font-weight: bold; letter-spacing: 1px; }
+  .btn-green  { background: #065f46; color: #6ee7b7; }
+  .btn-red    { background: #450a0a; color: #fca5a5; }
+  .btn-blue   { background: #1e3a5f; color: #93c5fd; }
+  .btn-yellow { background: #451a03; color: #fcd34d; }
+  .btn:hover { opacity: 0.8; }
+
+  .model-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+  .dot-on  { background: var(--green); }
+  .dot-off { background: var(--muted); }
+
+  #event-bar { padding: 5px 12px; background: #1a1000; border-bottom: 1px solid #2d1f00; display: flex; align-items: center; gap: 12px; font-size: 10px; }
+  .event-name { color: var(--yellow); font-weight: bold; }
+  .event-min  { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>⬡ PITS INTELLIGENCE OS</h1>
+    <div style="color:var(--muted);font-size:9px;letter-spacing:2px;margin-top:2px">PREDICTIVE INTELLIGENCE TRADING SYSTEM — FASES 1-5</div>
+  </div>
+  <div id="header-right">
+    <span id="badge-mode" class="badge badge-paper">PAPER</span>
+    <span id="badge-mt5" class="badge badge-off">MT5 OFF</span>
+    <span id="badge-sys" class="badge badge-off">SISTEMA OFF</span>
+    <span id="tps" style="color:var(--muted)">0.0 TPS</span>
+  </div>
+</div>
+
+<div id="event-bar">
+  <span>📅 PRÓXIMO EVENTO:</span>
+  <span class="event-name" id="event-name">—</span>
+  <span class="event-min" id="event-min"></span>
+  <span id="event-threshold" style="color:var(--accent)"></span>
+</div>
+
+<div id="status-bar">
+  <div class="stat"><div class="stat-val" id="stat-wr">—</div><div class="stat-lbl">Win Rate</div></div>
+  <div class="stat"><div class="stat-val" id="stat-sh">—</div><div class="stat-lbl">Sharpe</div></div>
+  <div class="stat"><div class="stat-val" id="stat-dd">—</div><div class="stat-lbl">Drawdown</div></div>
+  <div class="stat"><div class="stat-val" id="stat-pf">—</div><div class="stat-lbl">Profit Factor</div></div>
+  <div class="stat"><div class="stat-val" id="stat-pos">0</div><div class="stat-lbl">Posições</div></div>
+  <div class="stat"><div class="stat-val" id="stat-tks">0</div><div class="stat-lbl">Total Ticks</div></div>
+</div>
+
+<div id="grid">
+
+  <!-- Sinais -->
+  <div class="panel">
+    <h2>Sinais ML</h2>
+    <table>
+      <thead><tr><th>Ativo</th><th>Prob ↑</th><th>OBI</th><th>TFT</th><th>Regime</th></tr></thead>
+      <tbody id="signals-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Regime -->
+  <div class="panel">
+    <h2>Regime de Mercado</h2>
+    <div style="margin-bottom:10px">
+      <div style="color:var(--muted);font-size:9px;margin-bottom:4px">CAMADA 1 — MACRO</div>
+      <span class="regime-pill regime-NEUTRAL" id="regime-macro">—</span>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="color:var(--muted);font-size:9px;margin-bottom:4px">CAMADA 2 — VOLATILIDADE</div>
+      <span id="regime-vol" style="color:var(--accent)">—</span>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="color:var(--muted);font-size:9px;margin-bottom:4px">CAMADA 3 — MICRO</div>
+      <span id="regime-micro" style="color:var(--accent)">—</span>
+    </div>
+    <div>
+      <div style="color:var(--muted);font-size:9px;margin-bottom:4px">PADRÃO HISTÓRICO</div>
+      <span id="pattern-name" style="color:var(--yellow)">—</span>
+      <span id="pattern-sim" style="color:var(--muted);margin-left:6px"></span>
+    </div>
+  </div>
+
+  <!-- Modelos ativos -->
+  <div class="panel">
+    <h2>Ensemble — Modelos Ativos</h2>
+    <table>
+      <thead><tr><th>Modelo</th><th>Status</th><th>Peso</th><th>Fase</th></tr></thead>
+      <tbody>
+        <tr><td><span class="model-dot dot-on"></span>XGBoost</td><td class="up">✓ Ativo</td><td>30%</td><td class="muted">F1</td></tr>
+        <tr><td><span class="model-dot dot-on"></span>Bayesian</td><td class="up">✓ Ativo</td><td>20%</td><td class="muted">F1</td></tr>
+        <tr><td><span class="model-dot" id="dot-lstm"></span>LSTM</td><td id="stat-lstm" class="muted">Aguardando</td><td>25%</td><td class="muted">F5</td></tr>
+        <tr><td><span class="model-dot" id="dot-gnn"></span>GNN</td><td id="stat-gnn" class="muted">Aguardando</td><td>25%</td><td class="muted">F5</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;color:var(--muted);font-size:9px">
+      CONFIANÇA DO ENSEMBLE
+      <div class="prob-bar" style="margin-top:4px">
+        <div class="prob-fill" id="conf-bar" style="width:0%;background:var(--accent)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features detalhadas -->
+  <div class="panel panel-wide">
+    <h2>Features em Tempo Real — USOILm</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px" id="features-grid">
+      <div class="stat"><div class="stat-val" id="f-obi">—</div><div class="stat-lbl">OBI (10 nív)</div></div>
+      <div class="stat"><div class="stat-val" id="f-tft">—</div><div class="stat-lbl">TFT</div></div>
+      <div class="stat"><div class="stat-val" id="f-atr">—</div><div class="stat-lbl">ATR</div></div>
+      <div class="stat"><div class="stat-val" id="f-vwap">—</div><div class="stat-lbl">VWAP Dev%</div></div>
+      <div class="stat"><div class="stat-val" id="f-ofi">—</div><div class="stat-lbl">OFI</div></div>
+      <div class="stat"><div class="stat-val" id="f-spread">—</div><div class="stat-lbl">Spread</div></div>
+      <div class="stat"><div class="stat-val" id="f-vol">—</div><div class="stat-lbl">Volatility</div></div>
+      <div class="stat"><div class="stat-val" id="f-ent">—</div><div class="stat-lbl">Entropy</div></div>
+    </div>
+  </div>
+
+  <!-- Posições -->
+  <div class="panel">
+    <h2>Posições Abertas</h2>
+    <table>
+      <thead><tr><th>Ativo</th><th>Lado</th><th>Entrada</th><th>PnL%</th></tr></thead>
+      <tbody id="positions-body"><tr><td colspan="4" class="muted" style="text-align:center;padding:12px">Nenhuma posição</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Log -->
+  <div class="panel panel-full">
+    <h2>Log do Sistema</h2>
+    <div id="log"></div>
+  </div>
+
+</div>
+
+<div class="controls">
+  <button class="btn btn-green"  onclick="ctrl('resume')">▶ RESUMIR</button>
+  <button class="btn btn-red"    onclick="ctrl('pause')">⏸ PAUSAR</button>
+  <button class="btn btn-yellow" onclick="ctrl('force_retrain')">🔄 RETREINAR</button>
+  <button class="btn btn-blue"   onclick="ctrl('set_live')">⚡ LIVE MODE</button>
+  <span style="color:var(--muted);font-size:10px;align-self:center;margin-left:12px">
+    Dashboard v2 — Fases 1-5 | Atualiza a cada 1s
+  </span>
+</div>
+
+<script>
+const API = '';
+let totalTicks = 0;
+
+function colorProb(p) {
+  if (p >= 0.75) return 'var(--green)';
+  if (p >= 0.60) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function fmt(v, d=4) { return v !== undefined && v !== null ? Number(v).toFixed(d) : '—'; }
+
+async function fetchData() {
+  try {
+    const [statusR, metricsR, signalsR, posR, regR, logR, calR] = await Promise.all([
+      fetch(`${API}/status`).then(r=>r.json()),
+      fetch(`${API}/metrics`).then(r=>r.json()),
+      fetch(`${API}/signals`).then(r=>r.json()),
+      fetch(`${API}/positions`).then(r=>r.json()),
+      fetch(`${API}/regime`).then(r=>r.json()),
+      fetch(`${API}/logs`).then(r=>r.json()),
+      fetch(`${API}/calendar`).then(r=>r.json()).catch(()=>null),
+    ]);
+
+    updateHeader(statusR);
+    updateStats(metricsR, posR, statusR);
+    updateSignals(signalsR, statusR);
+    updateRegime(regR);
+    updateCalendar(calR);
+    updateLog(logR);
+    totalTicks += Math.round((statusR.ticks_per_second || 0));
+
+  } catch(e) {
+    console.error('Fetch error:', e);
+  }
+}
+
+function updateHeader(s) {
+  document.getElementById('badge-mt5').className = 'badge ' + (s.mt5_connected ? 'badge-on' : 'badge-off');
+  document.getElementById('badge-mt5').textContent = s.mt5_connected ? 'MT5 OK' : 'MT5 OFF';
+  document.getElementById('badge-sys').className = 'badge ' + (s.is_running ? 'badge-on' : 'badge-off');
+  document.getElementById('badge-sys').textContent = s.is_running ? 'RODANDO' : 'PARADO';
+  document.getElementById('badge-mode').className = 'badge ' + (s.is_live ? 'badge-live' : 'badge-paper');
+  document.getElementById('badge-mode').textContent = s.is_live ? 'LIVE ⚠' : 'PAPER';
+  document.getElementById('tps').textContent = (s.ticks_per_second || 0).toFixed(1) + ' TPS';
+  document.getElementById('stat-tks').textContent = totalTicks.toLocaleString();
+}
+
+function updateStats(m, pos, s) {
+  const wr = m.win_rate || 0;
+  document.getElementById('stat-wr').textContent = (wr*100).toFixed(1)+'%';
+  document.getElementById('stat-wr').style.color = wr>=0.5 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('stat-sh').textContent = fmt(m.sharpe, 2);
+  document.getElementById('stat-dd').textContent = ((m.drawdown||0)*100).toFixed(1)+'%';
+  document.getElementById('stat-pf').textContent = fmt(m.profit_factor, 2);
+  document.getElementById('stat-pos').textContent = (pos.positions||[]).length;
+}
+
+function updateSignals(data, status) {
+  const signals = data.signals || {};
+  const features = data.features || status.features || {};
+  const tbody = document.getElementById('signals-body');
+  tbody.innerHTML = '';
+
+  const symbols = ['USOILm','UKOILm','XAUUSDm','BTCUSDm','ETHUSDm'];
+  for (const sym of symbols) {
+    const prob = signals[sym] || 0;
+    const f = features[sym] || {};
+    const obi = f.obi !== undefined ? f.obi : null;
+    const tft = f.tft !== undefined ? f.tft : null;
+    const macro = f.macro_regime || '—';
+
+    const pct = (prob*100).toFixed(1);
+    const clr = colorProb(prob);
+
+    tbody.innerHTML += `
+      <tr>
+        <td style="color:var(--accent)">${sym.replace('m','')}</td>
+        <td style="color:${clr}">
+          ${pct}%
+          <div class="prob-bar"><div class="prob-fill" style="width:${pct}%;background:${clr}"></div></div>
+        </td>
+        <td style="color:${obi===null?'var(--muted)':obi>0?'var(--green)':'var(--red)'}">${obi!==null?obi.toFixed(3):'—'}</td>
+        <td style="color:${tft===null?'var(--muted)':tft>0.6?'var(--green)':tft<0.4?'var(--red)':'var(--yellow)'}">${tft!==null?(tft*100).toFixed(0)+'%':'—'}</td>
+        <td><span class="regime-pill regime-${macro}">${macro}</span></td>
+      </tr>`;
+
+    // Features do USOILm
+    if (sym === 'USOILm') {
+      document.getElementById('f-obi').textContent = obi !== null ? obi.toFixed(4) : '—';
+      document.getElementById('f-tft').textContent = tft !== null ? (tft*100).toFixed(1)+'%' : '—';
+      document.getElementById('f-atr').textContent = f.atr !== undefined ? f.atr.toFixed(4) : '—';
+      document.getElementById('f-vwap').textContent = f.vwap_dev_pct !== undefined ? (f.vwap_dev_pct*100).toFixed(3)+'%' : '—';
+      document.getElementById('f-ofi').textContent = f.ofi !== undefined ? f.ofi.toFixed(4) : '—';
+      document.getElementById('f-spread').textContent = f.spread !== undefined ? f.spread.toFixed(5) : '—';
+      document.getElementById('f-vol').textContent = f.volatility !== undefined ? f.volatility.toFixed(6) : '—';
+      document.getElementById('f-ent').textContent = f.entropy !== undefined ? f.entropy.toFixed(4) : '—';
+
+      if (f.pattern) {
+        document.getElementById('pattern-name').textContent = f.pattern;
+        document.getElementById('pattern-sim').textContent = f.pattern_sim ? (f.pattern_sim*100).toFixed(0)+'% match' : '';
+      }
+      if (f.ensemble_conf !== undefined) {
+        document.getElementById('conf-bar').style.width = (f.ensemble_conf*100)+'%';
+      }
+      if (f.models_active !== undefined) {
+        const lstm = f.models_active >= 3;
+        const gnn  = f.models_active >= 4;
+        document.getElementById('dot-lstm').className = 'model-dot ' + (lstm ? 'dot-on' : 'dot-off');
+        document.getElementById('stat-lstm').textContent = lstm ? '✓ Ativo' : 'Aguardando treino';
+        document.getElementById('stat-lstm').className = lstm ? 'up' : 'muted';
+        document.getElementById('dot-gnn').className  = 'model-dot ' + (gnn  ? 'dot-on' : 'dot-off');
+        document.getElementById('stat-gnn').textContent = gnn ? '✓ Ativo' : 'Aguardando treino';
+        document.getElementById('stat-gnn').className  = gnn  ? 'up' : 'muted';
+      }
+    }
+  }
+}
+
+function updateRegime(r) {
+  const macro = r.macro || 'NEUTRAL';
+  const el = document.getElementById('regime-macro');
+  el.textContent = macro;
+  el.className = 'regime-pill regime-' + macro;
+  document.getElementById('regime-vol').textContent = r.volatility || '—';
+  document.getElementById('regime-micro').textContent = r.micro || '—';
+}
+
+function updateCalendar(c) {
+  if (!c) return;
+  const name = c.name || '—';
+  const mins = c.minutes_remaining || 9999;
+  document.getElementById('event-name').textContent = name;
+  if (mins < 9999) {
+    document.getElementById('event-min').textContent = `em ${mins.toFixed(0)} min`;
+    if (mins <= 5) {
+      document.getElementById('event-threshold').textContent = '⚠ SISTEMA PAUSADO';
+      document.getElementById('event-bar').style.background = '#450a0a';
+    } else if (mins <= 30) {
+      document.getElementById('event-threshold').textContent = 'threshold: 65%';
+      document.getElementById('event-bar').style.background = '#451a03';
+    } else {
+      document.getElementById('event-threshold').textContent = '';
+      document.getElementById('event-bar').style.background = '#1a1000';
+    }
+  }
+}
+
+function updateLog(data) {
+  const logs = data.logs || [];
+  const el = document.getElementById('log');
+  el.innerHTML = logs.slice(0,20).map(l=>
+    `<div class="log-item"><span class="log-time">${l.time}</span><span class="log-msg">${l.message}</span></div>`
+  ).join('');
+}
+
+async function ctrl(action) {
+  try {
+    await fetch(`${API}/control`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action})
+    });
+  } catch(e) { console.error(e); }
+}
+
+fetchData();
+setInterval(fetchData, 1000);
+</script>
+</body>
+</html>
