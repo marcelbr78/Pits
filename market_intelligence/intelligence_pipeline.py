@@ -3,6 +3,12 @@ from typing import Dict, Any
 from .regime_detector import RegimeDetector
 from .volatility_regime import VolatilityRegime
 
+class MarketState:
+    def __init__(self, macro, volatility_regime, trend):
+        self.macro = macro
+        self.volatility_regime = volatility_regime
+        self.trend = trend
+
 class IntelligencePipeline:
     """
     Coordinates market context detection by combining trend and volatility regimes.
@@ -12,7 +18,7 @@ class IntelligencePipeline:
         self.detectors: Dict[str, RegimeDetector] = {}
         self.vol_regimes: Dict[str, VolatilityRegime] = {}
 
-    def get_market_state(self, features: Dict[str, Any]) -> str:
+    def get_market_state(self, features: Dict[str, Any]) -> MarketState:
         """
         Calculates the composite market state for a symbol.
         """
@@ -36,9 +42,7 @@ class IntelligencePipeline:
         regime = self.detectors[symbol].detect(mid, vwap, vwap_std)
         vol_state = self.vol_regimes[symbol].detect(vol)
         
-        market_state = f"{regime}_{vol_state}"
-        
         # Log transition only when it changes (optional but helpful)
-        self.logger.debug(f"[{symbol}] Market State: {market_state}")
+        self.logger.debug(f"[{symbol}] Market State: {regime}_{vol_state}")
         
-        return market_state
+        return MarketState(macro=regime, volatility_regime=vol_state, trend=regime)

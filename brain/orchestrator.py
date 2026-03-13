@@ -33,6 +33,8 @@ class PITSOrchestrator:
         self.symbols = ["USOILm", "BTCUSDm", "ETHUSDm", "XAUUSDm", "UKOILm"]
         self.state = SystemState()
         self.state.set_live(not dry_run)
+        self._tick_count = 0
+        self._start_time = time.time()
 
     def _setup_logger(self):
         logging.basicConfig(
@@ -44,6 +46,10 @@ class PITSOrchestrator:
     def _on_tick_received(self, tick: Dict[str, Any]):
         """Callback triggered for every new tick."""
         if not self.is_running: return # Stop if paused via API
+        
+        self._tick_count += 1
+        elapsed = time.time() - self._start_time
+        symbol = tick['symbol']
         
         # 1. Store raw tick
         self.storage.save_tick(tick)
@@ -70,14 +76,11 @@ class PITSOrchestrator:
         lot_size = recommended_risk * 10
         self.execution_pipeline.process_signal(features, prob_up, lot_size)
         
-        # 7. Update System State for API/Dashboard
-        self._update_state(tick, features, prob_up, market_state)
-
-    def _update_state(self, tick, features, prob_up, market_state):
-        symbol = tick['symbol'] if isinstance(tick, dict) else (tick.symbol if hasattr(tick, 'symbol') else str(tick))
-        
+        # 7. Update System State (User Requested)
+        # Atualizar sinais
         self.state.update_signal(symbol, prob_up)
-        
+
+        # Atualizar features
         if features:
             self.state.update_features(symbol, {
                 "ofi": round(float(features.get("ofi", 0)), 4),
@@ -86,61 +89,42 @@ class PITSOrchestrator:
                 "volatility": round(float(features.get("volatility", 0)), 4),
                 "entropy": round(float(features.get("entropy", 0)), 4),
             })
-        
-        if market_state:
-            # Handle string response from IntelligencePipeline
-            if isinstance(market_state, str):
-                parts = market_state.split('_')
-                macro = parts[0] if len(parts) > 0 else "UNKNOWN"
-                vol = parts[1] if len(parts) > 1 else "UNKNOWN"
-                micro = parts[2] if len(parts) > 2 else "UNKNOWN"
-            else:
-                macro = getattr(market_state, "macro", "UNKNOWN")
-                vol = getattr(market_state, "volatility", "UNKNOWN")
-                micro = getattr(market_state, "micro", "UNKNOWN")
-            
-            self.state.update_regime(macro, vol, micro)
-        
-        self.state.add_log(f"tick {symbol} prob={round(prob_up*100,1)}%")
 
-        # Periodic updates for heavy metadata (positions, metrics)
-        now = time.time()
-        if not hasattr(self, '_last_slow_update'): self._last_slow_update = 0
+        # Atualizar regime
+        if market_state:
+            self.state.update_regime(
+                str(getattr(market_state, 'macro', 'UNKNOWN')),
+                str(getattr(market_state, 'volatility_regime', 'UNKNOWN')),
+                str(getattr(market_state, 'trend', 'UNKNOWN'))
+            )
+
+        # Atualizar ticks por segundo
+        self.state.ticks_per_second = round(self._tick_count / max(1, elapsed), 2)
+
+        # Atualizar métricas do paper trading (a cada 10 ticks)
+        if self._tick_count % 10 == 0:
+            try:
+                # Use self.perf_tracker if defined (matches orchestrator instance variable)
+                metrics = self.perf_tracker.get_summary() if hasattr(self, 'perf_tracker') else {}
+                self.state.update_metrics(
+                    metrics.get("win_rate", 0),
+                    metrics.get("sharpe_ratio", 0),
+                    metrics.get("max_drawdown", 0),
+                    metrics.get("profit_factor", 0)
+                )
+                self.state.update_positions(
+                    self.position_manager.get_open_positions()
+                )
+            except:
+                pass
+
+        # Atualizar MT5 conectado
+        self.state.set_mt5_connected(self.mt5.is_connected())
+        self.state.set_running(True)
         
-        if now - self._last_slow_update > 5:
-            # Update Positions
-            if hasattr(self, 'position_manager'):
-                raw_pos = self.position_manager.get_open_positions()
-                pos_list = []
-                for p in raw_pos:
-                    pos_list.append({
-                        "symbol": p['symbol'],
-                        "type": "BUY" if p['type'] == 0 else "SELL",
-                        "entry": p['price_open'],
-                        "current": p['price_current'],
-                        "pnl": p['profit']
-                    })
-                self.state.update_positions(pos_list)
-            
-            # Update Metrics (from Paper Trading)
-            if os.path.exists("data/paper_trades.parquet") and hasattr(self, 'perf_tracker'):
-                try:
-                    df = self.perf_tracker.load_trades("data/paper_trades.parquet")
-                    metrics = self.perf_tracker.calculate_metrics(df)
-                    self.state.update_metrics(
-                        metrics.get('win_rate', 0),
-                        metrics.get('sharpe', 0),
-                        metrics.get('drawdown', 0),
-                        metrics.get('profit_factor', 0)
-                    )
-                    self.state.update_trades(df.to_dict(orient="records"))
-                except:
-                    pass
-            
-            if hasattr(self, 'mt5'):
-                self.state.set_mt5_connected(self.mt5.is_connected())
-            
-            self._last_slow_update = now
+        # Minimal log
+        if self._tick_count % 100 == 0:
+            self.state.add_log(f"Processed {self._tick_count} ticks. TPS: {self.state.ticks_per_second}")
 
     def initialize_engines(self):
         """Initializes all modular engines."""

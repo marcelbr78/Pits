@@ -51,3 +51,17 @@ class PerformanceTracker:
         
         self.logger.info(f"Performance Metrics: {metrics}")
         return metrics
+    def get_summary(self, path: str = "data/paper_trades.parquet") -> Dict[str, float]:
+        """
+        Loads trades from disk and returns current metrics.
+        """
+        import os
+        if not os.path.exists(path):
+            return self.calculate_metrics(pd.DataFrame())
+            
+        try:
+            df = pd.read_parquet(path)
+            return self.calculate_metrics(df)
+        except Exception as e:
+            self.logger.error(f"Error loading performance data: {e}")
+            return self.calculate_metrics(pd.DataFrame())
