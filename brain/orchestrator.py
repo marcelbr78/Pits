@@ -73,53 +73,73 @@ class PITSOrchestrator:
         # 7. Update System State for API/Dashboard
         self._update_state(tick, features, prob_up, market_state)
 
-    def _update_state(self, tick, features, prob, market_state):
-        symbol = tick['symbol']
+    def _update_state(self, tick, features, prob_up, market_state):
+        symbol = tick['symbol'] if isinstance(tick, dict) else (tick.symbol if hasattr(tick, 'symbol') else str(tick))
         
-        # Update signals and features
-        self.state.update_signals(symbol, prob)
-        self.state.update_features(symbol, features)
+        self.state.update_signal(symbol, prob_up)
         
-        # Update Regime
-        # Assuming market_intelligence provides macro/vol/micro
-        # For now we use the combined string and mock components if needed
-        regime_data = {
-            "combined": market_state,
-            "volatility": "High" if "HIGH_VOL" in market_state else "Low",
-            "macro": "Trending" if "TRENDING" in market_state else "Ranging"
-        }
-        self.state.update_regime(regime_data)
+        if features:
+            self.state.update_features(symbol, {
+                "ofi": round(float(features.get("ofi", 0)), 4),
+                "vwap": round(float(features.get("vwap", 0)), 4),
+                "spread": round(float(features.get("spread", 0)), 4),
+                "volatility": round(float(features.get("volatility", 0)), 4),
+                "entropy": round(float(features.get("entropy", 0)), 4),
+            })
         
+        if market_state:
+            # Handle string response from IntelligencePipeline
+            if isinstance(market_state, str):
+                parts = market_state.split('_')
+                macro = parts[0] if len(parts) > 0 else "UNKNOWN"
+                vol = parts[1] if len(parts) > 1 else "UNKNOWN"
+                micro = parts[2] if len(parts) > 2 else "UNKNOWN"
+            else:
+                macro = getattr(market_state, "macro", "UNKNOWN")
+                vol = getattr(market_state, "volatility", "UNKNOWN")
+                micro = getattr(market_state, "micro", "UNKNOWN")
+            
+            self.state.update_regime(macro, vol, micro)
+        
+        self.state.add_log(f"tick {symbol} prob={round(prob_up*100,1)}%")
+
         # Periodic updates for heavy metadata (positions, metrics)
         now = time.time()
         if not hasattr(self, '_last_slow_update'): self._last_slow_update = 0
         
         if now - self._last_slow_update > 5:
             # Update Positions
-            raw_pos = self.position_manager.get_open_positions()
-            # Map MT5 positions to our API format
-            pos_list = []
-            for p in raw_pos:
-                pos_list.append({
-                    "symbol": p['symbol'],
-                    "type": "BUY" if p['type'] == 0 else "SELL",
-                    "entry": p['price_open'],
-                    "current": p['price_current'],
-                    "pnl": p['profit']
-                })
-            self.state.update_positions(pos_list)
+            if hasattr(self, 'position_manager'):
+                raw_pos = self.position_manager.get_open_positions()
+                pos_list = []
+                for p in raw_pos:
+                    pos_list.append({
+                        "symbol": p['symbol'],
+                        "type": "BUY" if p['type'] == 0 else "SELL",
+                        "entry": p['price_open'],
+                        "current": p['price_current'],
+                        "pnl": p['profit']
+                    })
+                self.state.update_positions(pos_list)
             
             # Update Metrics (from Paper Trading)
-            if os.path.exists("data/paper_trades.parquet"):
+            if os.path.exists("data/paper_trades.parquet") and hasattr(self, 'perf_tracker'):
                 try:
                     df = self.perf_tracker.load_trades("data/paper_trades.parquet")
                     metrics = self.perf_tracker.calculate_metrics(df)
-                    self.state.update_metrics(metrics)
+                    self.state.update_metrics(
+                        metrics.get('win_rate', 0),
+                        metrics.get('sharpe', 0),
+                        metrics.get('drawdown', 0),
+                        metrics.get('profit_factor', 0)
+                    )
                     self.state.update_trades(df.to_dict(orient="records"))
                 except:
                     pass
             
-            self.state.set_mt5(self.mt5.is_connected())
+            if hasattr(self, 'mt5'):
+                self.state.set_mt5_connected(self.mt5.is_connected())
+            
             self._last_slow_update = now
 
     def initialize_engines(self):

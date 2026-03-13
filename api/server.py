@@ -1,88 +1,98 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Body
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
-import asyncio
-import json
-from typing import Dict, Any
-from .state import SystemState
+import asyncio, json, threading
+from api.state import SystemState
 
-app = FastAPI(title="PITS Real-Time API")
-state: SystemState = None # Will be injected by orchestrator
+_shared_state: SystemState = None
 
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/status")
-async def get_status():
-    s = state.get_full_state()
-    return {
-        "is_running": s["is_running"],
-        "is_live": s["is_live"],
-        "mt5_connected": s["mt5_connected"]
-    }
-
-@app.get("/metrics")
-async def get_metrics():
-    return state.get_full_state()["metrics"]
-
-@app.get("/signals")
-async def get_signals():
-    return state.get_full_state()["signals"]
-
-@app.get("/positions")
-async def get_positions():
-    return state.get_full_state()["positions"]
-
-@app.get("/trades")
-async def get_trades():
-    return state.get_full_state()["last_trades"]
-
-@app.get("/regime")
-async def get_regime():
-    return state.get_full_state()["regime"]
-
-@app.get("/features/{symbol}")
-async def get_features(symbol: str):
-    features = state.get_full_state()["features"]
-    return features.get(symbol, {})
-
-@app.get("/calendar")
-async def get_calendar():
-    return state.get_full_state()["next_event"]
-
-@app.post("/control")
-async def control_system(payload: Dict[str, str] = Body(...)):
-    action = payload.get("action")
-    # This will be handled by the orchestrator watching the state
-    if action == "pause":
-        state.set_running(False)
-    elif action == "resume":
-        state.set_running(True)
-    elif action == "set_live":
-        state.set_live(True)
-    elif action == "set_paper":
-        state.set_live(False)
+def create_app(shared_state: SystemState) -> FastAPI:
+    global _shared_state
+    _shared_state = shared_state
     
-    return {"status": "success", "action": action}
+    app = FastAPI(title="PITS API")
+    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+    
+    @app.get("/status")
+    def get_status():
+        s = _shared_state
+        with s.lock:
+            return {
+                "is_running": s.is_running, 
+                "is_live": s.is_live, 
+                "mt5_connected": s.mt5_connected, 
+                "ticks_per_second": s.ticks_per_second
+            }
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    try:
-        while True:
-            # Broadcast state every 1 second
-            full_state = state.get_full_state()
-            await websocket.send_text(json.dumps(full_state))
-            await asyncio.sleep(1)
-    except WebSocketDisconnect:
-        pass
+    @app.get("/metrics")
+    def get_metrics():
+        with _shared_state.lock:
+            return _shared_state.metrics
 
-def run_server(shared_state: SystemState, host: str = "0.0.0.0", port: int = 8001):
+    @app.get("/signals")
+    def get_signals():
+        with _shared_state.lock:
+            return _shared_state.signals
+
+    @app.get("/positions")
+    def get_positions():
+        with _shared_state.lock:
+            return _shared_state.positions
+
+    @app.get("/trades")
+    def get_trades():
+        with _shared_state.lock:
+            return _shared_state.last_trades
+
+    @app.get("/regime")
+    def get_regime():
+        with _shared_state.lock:
+            return _shared_state.regime
+
+    @app.get("/features/{symbol}")
+    def get_features(symbol: str):
+        with _shared_state.lock:
+            return _shared_state.features.get(symbol.upper(), {})
+
+    @app.get("/calendar")
+    def get_calendar():
+        with _shared_state.lock:
+            return _shared_state.next_event
+
+    @app.post("/control")
+    def control(action: str):
+        if action == "pause":
+            _shared_state.set_running(False)
+        elif action == "resume":
+            _shared_state.set_running(True)
+        elif action == "set_live":
+            with _shared_state.lock:
+                _shared_state.is_live = True
+        return {"status": "ok", "action": action}
+
+    @app.websocket("/ws")
+    async def websocket_endpoint(websocket: WebSocket):
+        await websocket.accept()
+        try:
+            while True:
+                data = _shared_state.get_full_state()
+                await websocket.send_text(json.dumps(data, default=str))
+                await asyncio.sleep(1)
+        except WebSocketDisconnect:
+            pass
+
+    @app.get("/dashboard", response_class=HTMLResponse)
+    def get_dashboard():
+        import os
+        dashboard_path = "dashboard/index.html"
+        if os.path.exists(dashboard_path):
+            with open(dashboard_path, "r", encoding="utf-8") as f:
+                return f.read()
+        return "Dashboard file not found."
+
+    return app
+
+def run_server(shared_state: SystemState, host="0.0.0.0", port=8001):
     import uvicorn
-    global state
-    state = shared_state
+    app = create_app(shared_state)
     uvicorn.run(app, host=host, port=port, log_level="error")
