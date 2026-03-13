@@ -30,20 +30,28 @@ def main():
         logger.error("No data available for training. Ensure 'data/ticks/' contains Parquet files.")
         return
 
-    # 2. Train Model
-    model = BayesianModel()
-    logger.info(f"Starting training on {len(X)} samples...")
-    model.train(X, y)
+    # 2. Train Models
+    # --- Bayesian ---
+    logger.info("Training Bayesian Model...")
+    bayes_model = BayesianModel()
+    bayes_model.train(X, y)
+    if bayes_model.is_trained:
+        bayes_model.save_model("models/bayesian_model.pkl")
+
+    # --- XGBoost ---
+    logger.info("Training XGBoost Model...")
+    xgb_model = XGBoostModel()
+    xgb_model.train(X, y)
+    if xgb_model.is_trained:
+        xgb_model.save_model("models/xgboost_model.json")
     
-    # 3. Persistence
-    if model.is_trained:
-        model_path = "models/bayesian_model.pkl"
-        model.save_model(model_path)
-        print(f"\n[SUCCESS] Training complete. Model saved to {model_path}")
+    # 3. Persistence Check
+    if bayes_model.is_trained and xgb_model.is_trained:
+        print(f"\n[SUCCESS] Ensemble Training complete.")
         print(f"[INFO] Samples: {len(X)}")
         print(f"[INFO] Dataset balance: {y.mean()*100:.2f}% UP")
     else:
-        logger.error("Training failed.")
+        logger.error("Training failed for one or more models.")
 
 if __name__ == "__main__":
     main()
