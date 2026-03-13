@@ -255,11 +255,10 @@
     </div>
 
     <script>
-        const symbols = ["WTI", "XAUUSD", "BRENT", "DXY", "US500", "VIX"];
-        let ws;
-
         function connect() {
-            ws = new WebSocket('ws://localhost:8001/ws');
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host || 'localhost:8001';
+            ws = new WebSocket(`${protocol}//${host}/ws`);
             
             ws.onopen = () => {
                 console.log('Connected to PITS WebSocket');
@@ -267,23 +266,31 @@
             };
 
             ws.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                updateUI(data);
+                try {
+                    const data = JSON.parse(event.data);
+                    updateUI(data);
+                } catch (e) {
+                    console.error("Error parsing WS data:", e);
+                }
             };
 
             ws.onclose = () => {
-                console.log('WebSocket disconnected. Retrying...');
+                console.log('WebSocket disconnected. Retrying in 3s...');
                 document.getElementById('dot-eng').classList.remove('online');
                 setTimeout(connect, 3000);
             };
         }
 
         function updateUI(data) {
+            if (!data) return;
+            
             // Stats
-            document.getElementById('val-win').innerText = (data.metrics.win_rate * 100).toFixed(1) + '%';
-            document.getElementById('val-sharpe').innerText = data.metrics.sharpe.toFixed(2);
-            document.getElementById('val-pf').innerText = data.metrics.profit_factor.toFixed(2);
-            document.getElementById('val-dd').innerText = (data.metrics.drawdown * 100).toFixed(1) + '%';
+            if (data.metrics) {
+                document.getElementById('val-win').innerText = ((data.metrics.win_rate || 0) * 100).toFixed(1) + '%';
+                document.getElementById('val-sharpe').innerText = (data.metrics.sharpe || 0).toFixed(2);
+                document.getElementById('val-pf').innerText = (data.metrics.profit_factor || 0).toFixed(2);
+                document.getElementById('val-dd').innerText = ((data.metrics.drawdown || 0) * 100).toFixed(1) + '%';
+            }
 
             // Status
             document.getElementById('dot-mt5').className = 'status-dot ' + (data.mt5_connected ? 'online' : '');
@@ -292,79 +299,96 @@
 
             // Signals
             const signalsContainer = document.getElementById('signals-container');
-            signalsContainer.innerHTML = '';
-            symbols.forEach(sym => {
-                const prob = data.signals[sym] || 0.5;
-                let color = 'var(--accent)';
-                if (prob > 0.75) color = 'var(--green)';
-                else if (prob < 0.25) color = 'var(--red)';
-                else if (prob > 0.55 || prob < 0.45) color = 'var(--yellow)';
+            if (data.signals) {
+                signalsContainer.innerHTML = '';
+                const activeSymbols = Object.keys(data.signals).length > 0 ? Object.keys(data.signals) : ["WTI", "XAUUSD", "US500"];
+                activeSymbols.forEach(sym => {
+                    const prob = data.signals[sym] || 0.5;
+                    let color = 'var(--accent)';
+                    if (prob > 0.75) color = 'var(--green)';
+                    else if (prob < 0.25) color = 'var(--red)';
+                    else if (prob > 0.55 || prob < 0.45) color = 'var(--yellow)';
 
-                signalsContainer.innerHTML += `
-                    <div class="signal-row">
-                        <div>${sym}</div>
-                        <div class="progress-bg"><div class="progress-fill" style="width: ${prob*100}%; background: ${color}"></div></div>
-                        <div style="text-align:right">${(prob * 100).toFixed(0)}%</div>
-                    </div>
-                `;
-            });
+                    signalsContainer.innerHTML += `
+                        <div class="signal-row">
+                            <div>${sym}</div>
+                            <div class="progress-bg"><div class="progress-fill" style="width: ${prob*100}%; background: ${color}"></div></div>
+                            <div style="text-align:right">${(prob * 100).toFixed(0)}%</div>
+                        </div>
+                    `;
+                });
+            }
 
             // Regime
-            document.getElementById('reg-macro').innerText = data.regime.macro;
-            document.getElementById('reg-vol').innerText = data.regime.volatility;
-            document.getElementById('reg-micro').innerText = data.regime.micro;
-            document.getElementById('reg-combined').innerText = data.regime.combined;
+            if (data.regime) {
+                document.getElementById('reg-macro').innerText = data.regime.macro || 'N/A';
+                document.getElementById('reg-vol').innerText = data.regime.volatility || 'N/A';
+                document.getElementById('reg-micro').innerText = data.regime.micro || 'N/A';
+                document.getElementById('reg-combined').innerText = data.regime.combined || 'N/A';
+            }
 
-            // WTI Features (or first available)
-            const wti = data.features['WTI'] || {};
-            document.getElementById('feat-ofi').innerText = (wti.ofi || 0).toFixed(2);
-            document.getElementById('feat-vwap').innerText = (wti.vwap || 0).toFixed(2);
-            document.getElementById('feat-ent').innerText = (wti.entropy || 0).toFixed(3);
-            document.getElementById('feat-spr').innerText = (wti.spread || 0).toFixed(6);
-            document.getElementById('feat-vol').innerText = (wti.volatility || 0).toFixed(5);
+            // Features (Dynamic search for WTI or first available)
+            const featSym = data.features && data.features['WTI'] ? 'WTI' : (data.features ? Object.keys(data.features)[0] : null);
+            if (featSym && data.features[featSym]) {
+                const f = data.features[featSym];
+                document.getElementById('wti-features').querySelector('h2').innerText = `${featSym} Live Features`;
+                document.getElementById('feat-ofi').innerText = (f.ofi || 0).toFixed(2);
+                document.getElementById('feat-vwap').innerText = (f.vwap || 0).toFixed(2);
+                document.getElementById('feat-ent').innerText = (f.entropy || 0).toFixed(3);
+                document.getElementById('feat-spr').innerText = (f.spread || 0).toFixed(6);
+                document.getElementById('feat-vol').innerText = (f.volatility || 0).toFixed(5);
+            }
 
             // Positions
-            const posBody = document.getElementById('positions-body');
-            posBody.innerHTML = '';
-            data.positions.forEach(p => {
-                const pnlClass = p.pnl >= 0 ? 'pnl-pos' : 'pnl-neg';
-                posBody.innerHTML += `
-                    <tr>
-                        <td>${p.symbol}</td>
-                        <td style="color:${p.type === 'BUY' ? 'var(--green)' : 'var(--red)'}">${p.type}</td>
-                        <td>${p.entry.toFixed(2)}</td>
-                        <td>${p.current.toFixed(2)}</td>
-                        <td class="${pnlClass}">${p.pnl.toFixed(2)}</td>
-                    </tr>
-                `;
-            });
+            if (data.positions) {
+                const posBody = document.getElementById('positions-body');
+                posBody.innerHTML = '';
+                data.positions.forEach(p => {
+                    const pnlClass = p.pnl >= 0 ? 'pnl-pos' : 'pnl-neg';
+                    posBody.innerHTML += `
+                        <tr>
+                            <td>${p.symbol}</td>
+                            <td style="color:${p.type === 'BUY' ? 'var(--green)' : 'var(--red)'}">${p.type}</td>
+                            <td>${(p.entry || 0).toFixed(2)}</td>
+                            <td>${(p.current || 0).toFixed(2)}</td>
+                            <td class="${pnlClass}">${(p.pnl || 0).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
 
             // Trades
-            const tradesBody = document.getElementById('trades-body');
-            tradesBody.innerHTML = '';
-            data.last_trades.forEach(t => {
-                tradesBody.innerHTML += `
-                    <tr>
-                        <td>${new Date(t.timestamp * 1000).toLocaleTimeString()}</td>
-                        <td>${t.symbol}</td>
-                        <td style="color:${t.result === 'PROFIT' ? 'var(--green)' : 'var(--red)'}">${t.result}</td>
-                        <td>$${t.profit.toFixed(2)}</td>
-                    </tr>
-                `;
-            });
+            if (data.last_trades) {
+                const tradesBody = document.getElementById('trades-body');
+                tradesBody.innerHTML = '';
+                data.last_trades.forEach(t => {
+                    tradesBody.innerHTML += `
+                        <tr>
+                            <td>${t.time || new Date().toLocaleTimeString()}</td>
+                            <td>${t.symbol || 'N/A'}</td>
+                            <td style="color:${t.result === 'PROFIT' ? 'var(--green)' : 'var(--red)'}">${t.result || 'N/A'}</td>
+                            <td>$${(t.profit || 0).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
 
-            // Logs
-            const logMonitor = document.getElementById('log-monitor');
-            logMonitor.innerHTML = data.logs.map(l => `<div class="log-entry">> ${l}</div>`).join('');
-            logMonitor.scrollTop = logMonitor.scrollHeight;
+            // Logs (handling new object format)
+            if (data.logs) {
+                const logMonitor = document.getElementById('log-monitor');
+                logMonitor.innerHTML = data.logs.map(l => `
+                    <div class="log-entry"><span style="color:var(--text-dim)">[${l.time}]</span> ${l.message}</div>
+                `).join('');
+                logMonitor.scrollTop = logMonitor.scrollHeight;
+            }
         }
 
         function sendControl(action) {
-            fetch('http://localhost:8001/control', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: action })
-            }).then(r => r.json()).then(d => console.log('Control Success:', d));
+            // Using query parameters as per the new FastAPI implementation
+            fetch(`/control?action=${action}`, {
+                method: 'POST'
+            }).then(r => r.json()).then(d => console.log('Control Success:', d))
+              .catch(e => console.error("Control Error:", e));
         }
 
         connect();

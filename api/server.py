@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio, json, threading
 from api.state import SystemState
+from api.mcp_bridge import setup_mcp_bridge
 
 _shared_state: SystemState = None
 
@@ -12,6 +13,8 @@ def create_app(shared_state: SystemState) -> FastAPI:
     
     app = FastAPI(title="PITS API")
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+    
+    setup_mcp_bridge(app, shared_state)
     
     @app.get("/status")
     def get_status():
