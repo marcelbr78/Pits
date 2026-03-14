@@ -22,12 +22,12 @@ if __name__ == "__main__":
     print("=" * 60)
     print("  PITS — Predictive Intelligence Trading System")
     print("  Fases 1-5 | WTI/Oil | Exness MT5")
-    print(f"  Modo: {'LIVE TRADING ⚠' if live else 'PAPER TRADING ✓'}")
+    print(f"  Modo: {'LIVE TRADING [!] ' if live else 'PAPER TRADING [OK]'}")
     print("  Features: OBI | TFT | Lag | ATR | Pattern | LSTM | GNN")
     print("=" * 60)
 
     if live:
-        confirm = input("\n  ⚠  LIVE TRADING ativado. Capital real em risco.\n  Digite CONFIRMAR para continuar: ")
+        confirm = input("\n  [!]  LIVE TRADING ativado. Capital real em risco.\n  Digite CONFIRMAR para continuar: ")
         if confirm.strip() != "CONFIRMAR":
             print("  Cancelado.")
             sys.exit(0)
